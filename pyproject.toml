@@ -1,0 +1,10 @@
+[project]
+name = "jpaboytesmcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.13.3",
+    "mcp>=1.22.0",
+]
