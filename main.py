@@ -1,19 +1,17 @@
 """
-Servidor MCP para búsqueda semántica con Gemini y Supabase
-Compatible con FastMCP Cloud
+Servidor FastMCP para búsqueda semántica con Gemini y Supabase
+Entry point para FastMCP Cloud deployment
 """
-from fastmcp import FastMCP
+import os
+import sys
 
-# Imports absolutos para compatibilidad con FastMCP CLI
-try:
-    from .gemini import gemini_client
-    from .supabase_client import supabase_client
-    from .config import config
-except ImportError:
-    # Fallback para ejecución directa con FastMCP
-    from src.gemini import gemini_client
-    from src.supabase_client import supabase_client
-    from src.config import config
+# Agregar el directorio actual al path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from fastmcp import FastMCP
+from src.gemini import gemini_client
+from src.supabase_client import supabase_client
+from src.config import config
 
 # Crear servidor FastMCP
 mcp = FastMCP("JpChatbotMCP")
@@ -29,11 +27,11 @@ async def search_documents(
     
     Args:
         query: Consulta de búsqueda en lenguaje natural
-        limit: Número máximo de documentos a retornar (default: 5)
-        threshold: Umbral de similitud 0-1 (default: 0.7)
+        limit: Número máximo de documentos a retornar (default del config: 5)
+        threshold: Umbral de similitud 0-1 (default del config: 0.7)
     
     Returns:
-        Resultados de búsqueda formateados
+        Resultados de búsqueda formateados con documentos similares
     """
     # Usar valores por defecto del config si no se especifican
     if limit is None:
@@ -84,7 +82,7 @@ async def generate_embedding(text: str) -> str:
         text: Texto para generar el embedding
     
     Returns:
-        Información sobre el embedding generado
+        Información sobre el embedding generado (dimensiones y valores de muestra)
     """
     try:
         embedding = await gemini_client.generate_embedding(text)

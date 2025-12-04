@@ -19,13 +19,10 @@ try:
 except Exception:
     supabase_client = None
 
-try:
-    from .main import main
-except Exception:
-    main = None
+# NO importar main en __init__ para evitar warning de runpy
+# main se importará directamente cuando se ejecute python -m src.main
 
 __all__ = [
-    "main",
     "config", 
     "gemini_client",
     "supabase_client"

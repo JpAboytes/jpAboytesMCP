@@ -1,21 +1,25 @@
-# jpAboytesMCP Server
+# jpAboytesMCP - FastMCP Server
 
-MCP Server para búsqueda semántica usando Google Gemini y Supabase.
+Servidor MCP para búsqueda semántica usando Google Gemini y Supabase, listo para deploy en FastMCP Cloud.
 
-## 🚀 Instalación Rápida
+## 🚀 Deploy a FastMCP Cloud
 
+### 1. Instalar FastMCP CLI
 ```bash
-# Clonar el repositorio
-git clone https://github.com/JpAboytes/jpAboytesMCP.git
-cd jpAboytesMCP
-
-# Instalar dependencias
-uv sync
-
-# Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus credenciales
+pip install fastmcp
 ```
+
+### 2. Autenticarse
+```bash
+fastmcp login
+```
+
+### 3. Deploy
+```bash
+fastmcp deploy
+```
+
+El comando automáticamente detecta tu servidor y lo sube a FastMCP Cloud.
 
 ## ⚙️ Configuración
 
