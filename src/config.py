@@ -18,7 +18,8 @@ class Config:
     
     # Gemini AI
     GEMINI_API_KEY: str = os.getenv('GEMINI_API_KEY', '')
-    GEMINI_MODEL: str = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')  # Igual que simulate_recomendation.py
+    GEMINI_MODEL: str = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
+    GEMINI_EMBED_MODEL: str = os.getenv('GEMINI_EMBED_MODEL', 'models/text-embedding-004')
     
     # Configuración de embeddings y RAG
     EMBED_DIM: int = int(os.getenv('EMBED_DIM', '768'))
@@ -55,11 +56,5 @@ class Config:
 # Instancia global de configuración
 config = Config()
 
-# Validar configuración al importar 
-if __name__ != "__main__" and not os.getenv('TESTING'):
-    try:
-        config.validate_required_vars()
-    except ValueError as e:
-        print(f"⚠️  Warning: {e}")
-        if os.getenv('NODE_ENV') != 'production':
-            pass  # En desarrollo, continuar con warning
+# NO validar automáticamente en import para evitar errores de startup
+# La validación se hará cuando se use el cliente

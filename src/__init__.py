@@ -1,15 +1,28 @@
 """
-FiscAI MCP Server - Servidor MCP para asesoramiento fiscal mexicano
+Jp Chatbot MCP Server - Servidor MCP para interactuar con mi about page
 """
 
 __version__ = "1.0.0"
-__author__ = "FiscAI Team"
-__description__ = "Servidor MCP con herramientas fiscales para México usando FastMCP"
+__author__ = "Jp"
+__description__ = "Servidor MCP para aprender"
 
-from .main import main
 from .config import config
-from .gemini import gemini_client
-from .supabase_client import supabase_client
+
+# Importaciones opcionales para evitar errores de startup
+try:
+    from .gemini import gemini_client
+except Exception:
+    gemini_client = None
+
+try:
+    from .supabase_client import supabase_client
+except Exception:
+    supabase_client = None
+
+try:
+    from .main import main
+except Exception:
+    main = None
 
 __all__ = [
     "main",

@@ -6,13 +6,12 @@ from typing import List, Dict, Any, Optional
 from supabase import create_client, Client
 from .config import config
 
-if not config.SUPABASE_URL or not config.SUPABASE_SERVICE_ROLE_KEY:
-    raise ValueError("Faltan variables de entorno de Supabase")
-
 class SupabaseClient:
     """Cliente para interactuar con Supabase"""
     
     def __init__(self):
+        if not config.SUPABASE_URL or not config.SUPABASE_SERVICE_ROLE_KEY:
+            raise ValueError("Faltan variables de entorno de Supabase")
         self.client: Client = create_client(
             config.SUPABASE_URL,
             config.SUPABASE_SERVICE_ROLE_KEY
@@ -72,5 +71,9 @@ class SupabaseClient:
             return []
 
 
-# Instancia global del cliente
-supabase_client = SupabaseClient()
+# Instancia global del cliente - con manejo de errores
+try:
+    supabase_client = SupabaseClient()
+except Exception as e:
+    print(f"⚠️  Warning: No se pudo crear cliente Supabase: {e}")
+    supabase_client = None

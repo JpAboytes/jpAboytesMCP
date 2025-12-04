@@ -1,10 +1,13 @@
 [project]
 name = "jpaboytesmcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP Server for semantic search with Gemini and Supabase"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "fastmcp>=2.13.3",
     "mcp>=1.22.0",
+    "python-dotenv>=1.0.0",
+    "google-generativeai>=0.8.0",
+    "supabase>=2.0.0",
 ]
