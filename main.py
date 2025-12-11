@@ -74,31 +74,6 @@ async def search_documents(
 
 
 @mcp.tool()
-async def generate_embedding(text: str) -> str:
-    """
-    Genera un embedding vectorial para un texto usando Gemini AI.
-    
-    Args:
-        text: Texto para generar el embedding
-    
-    Returns:
-        Información sobre el embedding generado (dimensiones y valores de muestra)
-    """
-    try:
-        embedding = await gemini_client.generate_embedding(text)
-        
-        result = f"✅ Embedding generado exitosamente\n"
-        result += f"- Dimensiones: {len(embedding)}\n"
-        result += f"- Primeros 5 valores: {embedding[:5]}\n"
-        result += f"- Últimos 5 valores: {embedding[-5:]}\n"
-        
-        return result
-        
-    except Exception as e:
-        return f"❌ Error generando embedding: {str(e)}"
-
-
-@mcp.tool()
 async def store_document(content: str, chunk_size: int = 500, chunk_overlap: int = 50) -> str:
     """
     Almacena un documento dividiéndolo en chunks óptimos para RAG y generando embeddings.
