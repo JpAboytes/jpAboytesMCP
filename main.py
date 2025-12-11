@@ -96,3 +96,111 @@ async def generate_embedding(text: str) -> str:
         
     except Exception as e:
         return f"❌ Error generando embedding: {str(e)}"
+
+
+@mcp.tool()
+async def store_document(content: str, chunk_size: int = 500, chunk_overlap: int = 50) -> str:
+    """
+    Almacena un documento dividiéndolo en chunks óptimos para RAG y generando embeddings.
+    
+    Args:
+        content: Contenido del documento a almacenar
+        chunk_size: Tamaño máximo de cada chunk en caracteres (default: 500)
+        chunk_overlap: Superposición entre chunks para mantener contexto (default: 50)
+    
+    Returns:
+        Resultado de la operación con los IDs de los chunks creados
+    """
+    try:
+        # Dividir el contenido en chunks
+        chunks = _split_into_chunks(content, chunk_size, chunk_overlap)
+        
+        stored_chunks = []
+        errors = []
+        
+        # Procesar cada chunk
+        for i, chunk in enumerate(chunks, 1):
+            try:
+                # Generar embedding del chunk
+                embedding = await gemini_client.generate_embedding(chunk)
+                
+                # Almacenar en la base de datos
+                result = await supabase_client.store_embedding(chunk, embedding)
+                
+                if result['success']:
+                    stored_chunks.append({
+                        'chunk_id': i,
+                        'doc_id': result['id'],
+                        'size': len(chunk)
+                    })
+                else:
+                    errors.append(f"Chunk {i}: {result['message']}")
+                    
+            except Exception as e:
+                errors.append(f"Chunk {i}: {str(e)}")
+        
+        # Formatear resultado
+        if stored_chunks:
+            result = f" Documento almacenado exitosamente\n"
+            result += f" Total de chunks: {len(chunks)}\n"
+            result += f" Chunks almacenados: {len(stored_chunks)}\n"
+            if errors:
+                result += f"❌ Errores: {len(errors)}\n"
+            result += f"\n Detalles:\n"
+            for chunk_info in stored_chunks[:5]:  # Mostrar primeros 5
+                result += f"   - Chunk {chunk_info['chunk_id']}: ID {chunk_info['doc_id']} ({chunk_info['size']} chars)\n"
+            if len(stored_chunks) > 5:
+                result += f"   ... y {len(stored_chunks) - 5} chunks más\n"
+            
+            if errors:
+                result += f"\n Errores encontrados:\n"
+                for error in errors[:3]:
+                    result += f"   - {error}\n"
+            
+            return result
+        else:
+            return f" No se pudo almacenar ningún chunk. Errores: {'; '.join(errors)}"
+        
+    except Exception as e:
+        return f" Error: {str(e)}"
+
+
+def _split_into_chunks(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
+    """
+    Divide un texto en chunks con superposición.
+    
+    Args:
+        text: Texto a dividir
+        chunk_size: Tamaño máximo de cada chunk
+        overlap: Superposición entre chunks
+        
+    Returns:
+        Lista de chunks de texto
+    """
+    if len(text) <= chunk_size:
+        return [text]
+    
+    chunks = []
+    start = 0
+    
+    while start < len(text):
+        end = start + chunk_size
+        
+        # Si no es el último chunk, buscar el último punto o salto de línea
+        if end < len(text):
+            # Buscar el último separador natural (punto, salto de línea, etc.)
+            last_period = text.rfind('.', start, end)
+            last_newline = text.rfind('\n', start, end)
+            last_separator = max(last_period, last_newline)
+            
+            if last_separator > start + chunk_size // 2:
+                end = last_separator + 1
+        
+        chunk = text[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        
+        # Mover el inicio con overlap
+        start = end - overlap if end < len(text) else end
+    
+    return chunks
