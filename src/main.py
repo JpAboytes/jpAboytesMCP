@@ -16,62 +16,6 @@ from src.config import config
 # Crear servidor FastMCP
 mcp = FastMCP("JpChatbotMCP")
 
-@mcp.tool()
-async def search_documents(
-    query: str,
-    limit: int = None,
-    threshold: float = None
-) -> str:
-    """
-    Busca documentos similares usando búsqueda semántica con Gemini embeddings y Supabase.
-    
-    Args:
-        query: Consulta de búsqueda en lenguaje natural
-        limit: Número máximo de documentos a retornar (default del config: 5)
-        threshold: Umbral de similitud 0-1 (default del config: 0.7)
-    
-    Returns:
-        Resultados de búsqueda formateados con documentos similares
-    """
-    # Usar valores por defecto del config si no se especifican
-    if limit is None:
-        limit = config.TOPK_DOCUMENTS
-    if threshold is None:
-        threshold = config.SIMILARITY_THRESHOLD
-    
-    try:
-        # Generar embedding de la consulta
-        embedding = await gemini_client.generate_embedding(query)
-        
-        # Buscar documentos similares
-        documents = await supabase_client.search_similar_documents(
-            embedding=embedding,
-            limit=limit,
-            threshold=threshold
-        )
-        
-        if not documents:
-            return "No se encontraron documentos similares para la consulta."
-        
-        # Formatear resultados
-        result = f"📚 Encontrados {len(documents)} documentos similares:\n\n"
-        for i, doc in enumerate(documents, 1):
-            similarity = doc.get('similarity', 0)
-            title = doc.get('title', 'Sin título')
-            scope = doc.get('scope', 'N/A')
-            content = doc.get('content', '')[:200] + '...'
-            source = doc.get('source_url', 'N/A')
-            
-            result += f"{i}. **{title}** (Similitud: {similarity:.2%})\n"
-            result += f"   - Ámbito: {scope}\n"
-            result += f"   - Contenido: {content}\n"
-            result += f"   - Fuente: {source}\n\n"
-        
-        return result
-        
-    except Exception as e:
-        return f"❌ Error en la búsqueda: {str(e)}"
-
 
 @mcp.tool()
 async def store_document(content: str, chunk_size: int = 500, chunk_overlap: int = 50) -> str:
@@ -140,6 +84,50 @@ async def store_document(content: str, chunk_size: int = 500, chunk_overlap: int
         return f" Error: {str(e)}"
     
 @mcp.tool()
+async def generate_response(query: str) -> str:
+    """
+    Herramienta para generar una respuesta basada en el query del usuario.
+    Args:
+        query: Pregunta o consulta del usuario
+    Returns:
+        Respuesta generada
+    """
+    
+    context = await match_documents(query)
+    
+    PROMPT = f"""
+    Eres un asistente especializado cuya única función es responder preguntas sobre el
+    currículum, trayectoria profesional, educación, proyectos, experiencia laboral y habilidades
+    de Juan Pablo Aboytes Dessens.
+
+    Usa exclusivamente la información proporcionada en la base de conocimiento recuperada
+    por el sistema RAG. Si la información no aparece en los documentos recuperados, responde
+    claramente que no está disponible y no inventes datos.
+
+    Instrucciones:
+    - Responde de forma clara, precisa y profesional.
+    - No generes información que no esté en la base de conocimiento.
+    - No asumas, no completes detalles y no alucines.
+    - Si el usuario hace una pregunta fuera del alcance del CV, responde que solo puedes
+    explicar información relacionada con su currículum.
+    - Si la consulta es ambigua, pide una aclaración.
+    - Si la base de conocimiento recuperada no contiene datos relevantes, dilo explícitamente.
+
+    Base de conocimiento recuperada:
+    {context}
+
+    Consulta del usuario:
+    {query}
+
+    Respuesta:
+    """
+    
+    response = await gemini_client.generate_text(PROMPT)
+        
+    return response
+
+
+
 async def match_documents(query : str) -> str:
     """
     Herramienta para a partir del query buscar informacion en la base de conocimientos.

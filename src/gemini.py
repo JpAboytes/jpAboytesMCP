@@ -71,6 +71,33 @@ class GeminiClient:
             import traceback
             traceback.print_exc()
             raise error
+    
+    async def generate_text(self, prompt: str) -> str:
+        """
+        Genera texto usando Gemini
+        
+        Args:
+            prompt: Prompt para generar el texto
+            
+        Returns:
+            Texto generado por el modelo
+        """
+        try:
+            response = await asyncio.to_thread(
+                self.model.generate_content,
+                prompt
+            )
+            
+            if response and response.text:
+                return response.text
+            else:
+                raise RuntimeError("No se recibió respuesta del modelo")
+                
+        except Exception as error:
+            print(f"Error generando texto: {error}")
+            import traceback
+            traceback.print_exc()
+            raise error
 
 
 # Instancia global del cliente - con manejo de errores
