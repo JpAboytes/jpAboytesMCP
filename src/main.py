@@ -138,7 +138,27 @@ async def store_document(content: str, chunk_size: int = 500, chunk_overlap: int
         
     except Exception as e:
         return f" Error: {str(e)}"
-
+    
+@mcp.tool()
+async def match_documents(query : str) -> str:
+    """
+    Herramienta para a partir del query buscar informacion en la base de conocimientos.
+    """
+    
+    query_embedding = await gemini_client.generate_embedding(query)
+    
+    if not query_embedding:
+        print(" No se pudo generar el embedding")
+        return
+    
+    results = await supabase_client.search_similar_documents(
+        embedding=query_embedding,
+        limit=5,
+        threshold=0.5
+    )
+    
+    return results
+    
 
 def _split_into_chunks(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
     """

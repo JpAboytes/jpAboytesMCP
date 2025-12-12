@@ -76,7 +76,6 @@ class SupabaseClient:
     ) -> List[Dict[str, Any]]:
         """
         Buscar documentos similares usando embeddings
-        Compatible con match_fiscai_documents RPC
         
         Args:
             embedding: Vector de embedding para la búsqueda
@@ -88,12 +87,7 @@ class SupabaseClient:
         """
         try:
             if threshold is None:
-                threshold = config.SIMILARITY_THRESHOLD if hasattr(config, 'SIMILARITY_THRESHOLD') else 0.6
-            
-            print(f"[SUPABASE] Buscando documentos similares...")
-            print(f"[SUPABASE] - Embedding dimension: {len(embedding)}")
-            print(f"[SUPABASE] - Match threshold: {threshold}")
-            print(f"[SUPABASE] - Match count: {limit}")
+                threshold = config.SIMILARITY_THRESHOLD if hasattr(config, 'SIMILARITY_THRESHOLD') else 0.6           
             
             # Preparar payload - usar query_embedding como en el script que funciona
             payload = {
@@ -103,7 +97,6 @@ class SupabaseClient:
             }
             
             # Usar match_documents (única función RPC disponible)
-            print("[SUPABASE] Llamando match_documents RPC...")
             response = await asyncio.to_thread(
                 lambda: self.client.rpc('match_documents', payload).execute()
             )
