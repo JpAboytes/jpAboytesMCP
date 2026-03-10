@@ -19,7 +19,7 @@ class Config:
     # Gemini AI
     GEMINI_API_KEY: str = os.getenv('GEMINI_API_KEY', '')
     GEMINI_MODEL: str = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
-    GEMINI_EMBED_MODEL: str = os.getenv('GEMINI_EMBED_MODEL', 'models/text-embedding-004')
+    GEMINI_EMBED_MODEL: str = os.getenv('GEMINI_EMBED_MODEL', 'models/text-embedding-005')
     
     # Configuración de embeddings y RAG
     EMBED_DIM: int = int(os.getenv('EMBED_DIM', '768'))
