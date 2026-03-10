@@ -29,7 +29,7 @@ Crea un archivo `.env` en la raíz del proyecto:
 SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
 GEMINI_API_KEY=tu-gemini-api-key
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_EMBED_MODEL=models/text-embedding-004
 EMBED_DIM=768
 SIMILARITY_THRESHOLD=0.6
